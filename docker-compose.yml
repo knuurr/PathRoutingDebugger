@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  debug-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    # expose:
+    #   - 80
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.debug-app.rule=Host(`traefik.domain.local`) && PathPrefix(`/testapp`)"
+      # associates the stripprefix middleware with the app router
+      - "traefik.http.routers.debug-app.middlewares=stripprefix,authelia@docker"
+      # configures the stripprefix middleware to remove the "/testapp" prefix from the incoming request
+      - "traefik.http.middlewares.stripprefix.stripprefix.prefixes=/testapp"      
+      - "traefik.http.services.debug-app.loadbalancer.server.port=8000"
+      - "traefik.http.routers.debug-app.tls=true"
+
+
